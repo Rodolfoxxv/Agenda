@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agenda</title>
+</head>
+<body>
+    <h1>Agenda</h1>
+    <form method="POST">
+        <label for="atividade">Atividade:</label><br>
+        <input type="text" id="atividade" name="atividade"><br>
+        <label for="horario_planejado">Horário Planejado:</label><br>
+        <input type="text" id="horario_planejado" name="horario_planejado"><br>
+        <input type="submit" value="Inserir">
+    </form>
+    <table>
+        <tr>
+            <th>Dia da Semana</th>
+            <th>Mês</th>
+            <th>Ano</th>
+            <th>Atividade</th>
+            <th>Horário Planejado</th>
+            <th>Horário Planejado Concluído</th>
+            <th>Horário Real Início</th>
+            <th>Horário Real Final</th>
+            <th>Tarefa Concluída</th>
+            <th>Nível de Energia</th>
+        </tr>
+        {% for atividade in agenda.itertuples() %}
+        <tr>
+            <td>{{ atividade.dia_da_semana }}</td>
+            <td>{{ atividade.mes }}</td>
+            <td>{{ atividade.ano }}</td>
+            <td>{{ atividade.atividade }}</td>
+            <td>{{ atividade.horario_planejado }}</td>
+            <td>{{ atividade.horario_planejado_concluido }}</td>
+            <td>{{ atividade.horario_real_inicio }}</td>
+            <td>{{ atividade.horario_real_final }}</td>
+            <td>{{ atividade.tarefa_concluida }}</td>
+            <td>{{ atividade.nivel_de_energia }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
