@@ -5,11 +5,10 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Conecte-se ao banco de dados
-con = duckdb.connect('C:/Users/rodol/OneDrive/Documents/GitHub/Agenda/agenda.db')
-
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    # Conecte-se ao banco de dados
+    con = duckdb.connect('C:/Users/rodol/OneDrive/Documents/GitHub/Agenda/agenda.db')
     if request.method == 'POST':
         # Obtenha os dados do formulário
         atividade = request.form.get('atividade')
@@ -35,6 +34,8 @@ def home():
         con.execute('INSERT INTO agenda SELECT * FROM nova_atividade')
     # Obtenha a agenda do banco de dados
     agenda = con.execute('SELECT * FROM agenda').fetchdf()
+    # Feche a conexão com o banco de dados
+    con.close()
     return render_template('index.html', agenda=agenda)
 
 if __name__ == '__main__':

@@ -4,6 +4,20 @@ import pandas as pd
 # Inicialize o DuckDB no diretório especificado
 con = duckdb.connect('C:/Users/rodol/OneDrive/Documents/GitHub/Agenda/agenda.db')
 
+# Crie a tabela agenda se ela não existir
+con.execute("""
+CREATE TABLE IF NOT EXISTS agenda (
+    "Dia da Semana" VARCHAR,
+    "Atividade" VARCHAR,
+    "Horário Planejado" VARCHAR,
+    "Horário Planejado Concluído" VARCHAR,
+    "Horário Real Início" VARCHAR,
+    "Horário Real Final" VARCHAR,
+    "Tarefa Concluída" VARCHAR,
+    "Nível de Energia" VARCHAR
+)
+""")
+
 # Crie um DataFrame pandas com a estrutura da sua agenda
 agenda = pd.DataFrame({
     'Dia da Semana': ['Segunda-feira', 'Segunda-feira'],
@@ -16,7 +30,10 @@ agenda = pd.DataFrame({
     'Nível de Energia': [None, None]
 })
 
-# Crie uma tabela no DuckDB a partir do DataFrame
-con.register('agenda', agenda)
+# Insira os dados do DataFrame na tabela
+for index, row in agenda.iterrows():
+    con.execute("""
+    INSERT INTO agenda VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, row.tolist())
 
 print("Banco de dados e tabela criados com sucesso!")
