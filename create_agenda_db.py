@@ -1,39 +1,55 @@
+from pathlib import Path
+
 import duckdb
 import pandas as pd
 
-# Inicialize o DuckDB no diretório especificado
-con = duckdb.connect('C:/Users/rodol/OneDrive/Documents/GitHub/Agenda/agenda.db')
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = BASE_DIR / 'agenda.db'
 
-# Crie a tabela agenda se ela não existir
-con.execute("""
-CREATE TABLE IF NOT EXISTS agenda (
-    "Dia da Semana" VARCHAR,
-    "Atividade" VARCHAR,
-    "Horário Planejado" VARCHAR,
-    "Horário Planejado Concluído" VARCHAR,
-    "Horário Real Início" VARCHAR,
-    "Horário Real Final" VARCHAR,
-    "Tarefa Concluída" VARCHAR,
-    "Nível de Energia" VARCHAR
-)
-""")
+with duckdb.connect(DB_PATH.as_posix()) as con:
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS agenda (
+            "Dia da Semana" VARCHAR,
+            "Mês" VARCHAR,
+            "Ano" VARCHAR,
+            "Atividade" VARCHAR,
+            "Horário Planejado" VARCHAR,
+            "Horário Planejado Concluído" VARCHAR,
+            "Horário Real Início" VARCHAR,
+            "Horário Real Final" VARCHAR,
+            "Tarefa Concluída" VARCHAR,
+            "Nível de Energia" VARCHAR
+        )
+        """
+    )
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS integration_events (
+            id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            received_at TIMESTAMP NOT NULL,
+            payload JSON NOT NULL
+        )
+        """
+    )
 
-# Crie um DataFrame pandas com a estrutura da sua agenda
-agenda = pd.DataFrame({
-    'Dia da Semana': ['Segunda-feira', 'Segunda-feira'],
-    'Atividade': ['Trabalho', 'Academia'],
-    'Horário Planejado': ['8:00', '15:30'],
-    'Horário Planejado Concluído': [None, None],
-    'Horário Real Início': [None, None],
-    'Horário Real Final': [None, None],
-    'Tarefa Concluída': [None, None],
-    'Nível de Energia': [None, None]
-})
+    agenda = pd.DataFrame(
+        {
+            'Dia da Semana': ['Segunda-feira', 'Segunda-feira'],
+            'Mês': ['Janeiro', 'Janeiro'],
+            'Ano': ['2024', '2024'],
+            'Atividade': ['Trabalho', 'Academia'],
+            'Horário Planejado': ['8:00', '15:30'],
+            'Horário Planejado Concluído': [None, None],
+            'Horário Real Início': [None, None],
+            'Horário Real Final': [None, None],
+            'Tarefa Concluída': [None, None],
+            'Nível de Energia': [None, None],
+        }
+    )
 
-# Insira os dados do DataFrame na tabela
-for index, row in agenda.iterrows():
-    con.execute("""
-    INSERT INTO agenda VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, row.tolist())
+    con.register('agenda_seed', agenda)
+    con.execute('DELETE FROM agenda')
+    con.execute('INSERT INTO agenda SELECT * FROM agenda_seed')
 
-print("Banco de dados e tabela criados com sucesso!")
+print('Banco de dados e tabelas criados com sucesso!')
